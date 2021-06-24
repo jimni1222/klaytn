@@ -438,6 +438,7 @@ func (s *PublicTransactionPoolAPI) SignTransactionAsFeePayer(ctx context.Context
 	}
 	feePayer, err := tx.FeePayer()
 	if err != nil {
+		logger.Crit("================> Fee Payer is invalid", "err", err)
 		return nil, errTxArgInvalidFeePayer
 	}
 	feePayerSignedTx, err := s.signAsFeePayer(feePayer, tx)
