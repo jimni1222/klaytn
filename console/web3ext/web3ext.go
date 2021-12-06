@@ -35,7 +35,230 @@ var Modules = map[string]string{
 	"governance":       Governance_JS,
 	"bootnode":         Bootnode_JS,
 	"chaindatafetcher": ChainDataFetcher_JS,
+	"eth":              Eth_JS,
 }
+
+const Eth_JS = `
+var blockWithConsensusInfoCall = function (args) {
+    return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? "eth_getBlockWithConsensusInfoByHash" : "eth_getBlockWithConsensusInfoByNumber";
+};
+
+web3._extend({
+	property: 'eth',
+	methods: [
+		new web3._extend.Method({
+			name: 'clientVersion',
+			call: 'eth_clientVersion',
+		}),
+		new web3._extend.Method({
+			name: 'getBlockReceipts',
+			call: 'eth_getBlockReceipts',
+			params: 1,
+			outputFormatter: function(receipts) {
+				var formatted = [];
+				for (var i = 0; i < receipts.length; i++) {
+					formatted.push(web3._extend.formatters.outputTransactionReceiptFormatter(receipts[i]));
+				}
+				return formatted;
+			}
+		}),
+		new web3._extend.Method({
+			name: 'sign',
+			call: 'eth_sign',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
+		}),
+		new web3._extend.Method({
+			name: 'resend',
+			call: 'eth_resend',
+			params: 3,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter, web3._extend.utils.fromDecimal, web3._extend.utils.fromDecimal]
+		}),
+		new web3._extend.Method({
+			name: 'signTransaction',
+			call: 'eth_signTransaction',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'signTransactionAsFeePayer',
+			call: 'eth_signTransactionAsFeePayer',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'sendTransactionAsFeePayer',
+			call: 'eth_sendTransactionAsFeePayer',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getCouncil',
+			call: 'eth_getCouncil',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getCouncilSize',
+			call: 'eth_getCouncilSize',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getCommittee',
+			call: 'eth_getCommittee',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getCommitteeSize',
+			call: 'eth_getCommitteeSize',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'gasPriceAt',
+			call: 'eth_gasPriceAt',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter],
+			outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+		}),
+		new web3._extend.Method({
+			name: 'accountCreated',
+			call: 'eth_accountCreated'
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+		}),
+		new web3._extend.Method({
+			name: 'getAccount',
+			call: 'eth_getAccount'
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter],
+		}),
+		new web3._extend.Method({
+			name: 'getHeaderByNumber',
+			call: 'eth_getHeaderByNumber',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getHeaderByHash',
+			call: 'eth_getHeaderByHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getBlockWithConsensusInfo',
+			call: blockWithConsensusInfoCall,
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getBlockWithConsensusInfoRange',
+			call: 'eth_getBlockWithConsensusInfoByNumberRange',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'isContractAccount',
+			call: 'eth_isContractAccount',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'submitTransaction',
+			call: 'eth_submitTransaction',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRawTransaction',
+			call: 'eth_getRawTransactionByHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'estimateComputationCost',
+			call: 'eth_estimateComputationCost',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputCallFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getAccountKey',
+			call: 'eth_getAccountKey',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getRawTransactionFromBlock',
+			call: function(args) {
+				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'eth_getRawTransactionByBlockHashAndIndex' : 'eth_getRawTransactionByBlockNumberAndIndex';
+			},
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
+		}),
+		new web3._extend.Method({
+			name: 'isParallelDBWrite',
+			call: 'eth_isParallelDBWrite',
+		}),
+		new web3._extend.Method({
+			name: 'isSenderTxHashIndexingEnabled',
+			call: 'eth_isSenderTxHashIndexingEnabled',
+		}),
+		new web3._extend.Method({
+			name: 'getTransactionBySenderTxHash',
+			call: 'eth_getTransactionBySenderTxHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getTransactionReceiptBySenderTxHash',
+			call: 'eth_getTransactionReceiptBySenderTxHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getCypressCredit',
+			call: 'eth_getCypressCredit',
+		}),
+		new web3._extend.Method({
+			name: 'sha3',
+			call: 'eth_sha3',
+			params: 1,
+			inputFormatter: [web3._extend.utils.toHex],
+		}),
+		new web3._extend.Method({
+			name: 'encodeAccountKey',
+			call: 'eth_encodeAccountKey',
+			params: 1,
+		}),
+		new web3._extend.Method({
+			name: 'decodeAccountKey',
+			call: 'eth_decodeAccountKey',
+			params: 1,
+		}),
+	],
+	properties: [
+		new web3._extend.Property({
+			name: 'pendingTransactions',
+			getter: 'eth_pendingTransactions',
+			outputFormatter: function(txs) {
+				var formatted = [];
+				for (var i = 0; i < txs.length; i++) {
+					formatted.push(web3._extend.formatters.outputTransactionFormatter(txs[i]));
+					formatted[i].blockHash = null;
+				}
+				return formatted;
+			}
+		}),
+        new web3._extend.Property({
+            name : 'rewardbase',
+            getter: 'eth_rewardbase'
+        }),
+        new web3._extend.Property({
+            name : 'gasPrice',
+            getter: 'eth_gasPrice',
+            outputFormatter: web3._extend.formatters.outputBigNumberFormatter
+        }),
+	]
+});
+`
 
 const ChainDataFetcher_JS = `
 web3._extend({
