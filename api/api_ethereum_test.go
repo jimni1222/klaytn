@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"github.com/klaytn/klaytn/storage/database/mocks"
 	"math/big"
 	"reflect"
 	"testing"
@@ -67,10 +68,20 @@ func TestEthereumAPI_GetTransactionByHash(t *testing.T) {
 	// MockDatabaseManager will initiate data with txHashMap, block and queryFromPool.
 	// If queryFromPool is true, MockDatabaseManager will return nil to query transactions from transaction pool,
 	// otherwise return a transaction from txHashMap.
-	mockDBManager := &MockDatabaseManager{txHashMap: txHashMap, blockData: block, queryFromPool: false}
+	//mockDBManager := &MockDatabaseManager{txHashMap: txHashMap, blockData: block, queryFromPool: false}
 
+	mockDBManger := mock_database.NewMockDBManager(mockCtrl)
 	// Mock Backend functions.
-	mockBackend.EXPECT().ChainDB().Return(mockDBManager).Times(txs.Len())
+	mockBackend.EXPECT().ChainDB().Return(mockDBManger).Times(txs.Len())
+	mockDBManger.EXPECT().ReadTxAndLookupInfo(gomock.Any()).DoAndReturn(
+		func(hash common.Hash) (*types.Transaction, common.Hash, uint64, uint64) {
+			txFromHashMap := txHashMap[hash]
+			if txFromHashMap == nil {
+				return nil, common.Hash{}, 0, 0
+			}
+			return txFromHashMap, block.Hash(), block.NumberU64(), txFromHashMap.Nonce()
+		},
+	)
 
 	// Get transaction by hash for each transaction types.
 	for i := 0; i < txs.Len(); i++ {
