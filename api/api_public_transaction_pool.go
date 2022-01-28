@@ -360,7 +360,7 @@ func (s *PublicTransactionPoolAPI) SendTransactionAsFeePayer(ctx context.Context
 func (s *PublicTransactionPoolAPI) SendRawTransaction(ctx context.Context, encodedTx hexutil.Bytes) error {
 	tx := new(types.Transaction)
 	if err := rlp.DecodeBytes(encodedTx, tx); err != nil {
-		return common.Hash{}, err
+		return err
 	}
 	_, err := submitTransaction(ctx, s.b, tx)
 	if err != nil {
