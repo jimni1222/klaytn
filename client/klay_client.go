@@ -250,7 +250,7 @@ func (ec *Client) TransactionReceiptRpcOutput(ctx context.Context, txHash common
 	if err == nil && r == nil {
 		return nil, klaytn.NotFound
 	}
-	return
+	return r, err
 }
 
 func toBlockNumArg(number *big.Int) string {
