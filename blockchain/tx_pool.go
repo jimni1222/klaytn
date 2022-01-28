@@ -621,7 +621,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction) error {
 
 	// Check chain Id first.
 	if tx.ChainId().Cmp(pool.chainconfig.ChainID) != 0 {
-		return ErrInvalidChainId
+		return errors.New("in tx pool validateTx => invalid chain id for signer tx.ChainId(): " + tx.ChainId().String() + " / pool.chainconfig.ChainID: " + pool.chainconfig.ChainID.String())
 	}
 
 	// NOTE-Klaytn Drop transactions with unexpected gasPrice

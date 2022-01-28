@@ -239,7 +239,7 @@ func (s EIP155Signer) Sender(tx *Transaction) (common.Address, error) {
 	}
 
 	if tx.ChainId().Cmp(s.chainId) != 0 {
-		return common.Address{}, ErrInvalidChainId
+		return common.Address{}, errors.New("invalid chain id for signer tx.ChainId(): " + tx.ChainId().String() + " / s.chainId: " + s.chainId.String())
 	}
 	return tx.data.RecoverAddress(s.Hash(tx), true, func(v *big.Int) *big.Int {
 		V := new(big.Int).Sub(v, s.chainIdMul)
@@ -254,7 +254,7 @@ func (s EIP155Signer) SenderPubkey(tx *Transaction) ([]*ecdsa.PublicKey, error) 
 	}
 
 	if tx.ChainId().Cmp(s.chainId) != 0 {
-		return nil, ErrInvalidChainId
+		return nil, errors.New("invalid chain id for signer tx.ChainId(): " + tx.ChainId().String() + " / s.chainId: " + s.chainId.String())
 	}
 	return tx.data.RecoverPubkey(s.Hash(tx), true, func(v *big.Int) *big.Int {
 		V := new(big.Int).Sub(v, s.chainIdMul)
