@@ -634,28 +634,7 @@ func (jst *Tracer) GetResult() (json.RawMessage, error) {
 	obj := jst.vm.PushObject()
 
 	for key, val := range jst.ctx {
-		switch val := val.(type) {
-		case uint64:
-			jst.vm.PushUint(uint(val))
-
-		case string:
-			jst.vm.PushString(val)
-
-		case []byte:
-			ptr := jst.vm.PushFixedBuffer(len(val))
-			copy(makeSlice(ptr, uint(len(val))), val[:])
-
-		case common.Address:
-			ptr := jst.vm.PushFixedBuffer(20)
-			copy(makeSlice(ptr, 20), val[:])
-
-		case *big.Int:
-			pushBigInt(val, jst.vm)
-
-		default:
-			panic(fmt.Sprintf("unsupported type: %T", val))
-		}
-		jst.vm.PutPropString(obj, key)
+		jst.addToObj(obj, key, val)
 	}
 	jst.vm.PutPropString(jst.stateObject, "ctx")
 
@@ -669,4 +648,36 @@ func (jst *Tracer) GetResult() (json.RawMessage, error) {
 	jst.vm.Destroy()
 
 	return result, jst.err
+}
+
+// addToObj pushes a field to a JS object.
+func (jst *Tracer) addToObj(obj int, key string, val interface{}) {
+	pushValue(jst.vm, val)
+	jst.vm.PutPropString(obj, key)
+}
+
+func pushValue(ctx *duktape.Context, val interface{}) {
+	switch val := val.(type) {
+	case uint64:
+		ctx.PushUint(uint(val))
+	case string:
+		ctx.PushString(val)
+	case []byte:
+		ptr := ctx.PushFixedBuffer(len(val))
+		copy(makeSlice(ptr, uint(len(val))), val)
+	case common.Address:
+		ptr := ctx.PushFixedBuffer(20)
+		copy(makeSlice(ptr, 20), val[:])
+	case *big.Int:
+		pushBigInt(val, ctx)
+	case int:
+		ctx.PushInt(val)
+	case uint:
+		ctx.PushUint(val)
+	case common.Hash:
+		ptr := ctx.PushFixedBuffer(32)
+		copy(makeSlice(ptr, 32), val[:])
+	default:
+		panic(fmt.Sprintf("unsupported type: %T", val))
+	}
 }
