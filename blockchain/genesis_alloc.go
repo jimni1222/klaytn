@@ -38,8 +38,8 @@ var (
             "governanceMode": "single",
             "governingNode": "0x99fb17d324fa0e07f23b49d09028ac0919414db6",
             "reward": {
-                "mintingAmount" : 9600000000000000000,
-                "ratio" : "34/54/12",
+                "mintingAmount" : 9612345678123456787,
+                "ratio" : "37/52/11",
                 "useGiniCoeff" : true,
                 "deferredTxFee": true,
                 "stakingUpdateInterval": 86400,
@@ -52,7 +52,7 @@ var (
             "policy": 2,
             "sub": 22
         },
-        "unitPrice": 25000000000
+        "unitPrice": 25123456789
     },
     "timestamp": "0x5d132648",
     "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000f89af8549499fb17d324fa0e07f23b49d09028ac0919414db694b74ff9dea397fe9e231df545eb53fe2adf776cb294571e53df607be97431a5bbefca1dffe5aef56f4d945cb1a7dccbd0dc446e3640898ede8820368554c8b8410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c0",
@@ -80,8 +80,8 @@ var (
             "governanceMode": "single",
             "governingNode": "0x52d41ca72af615a1ac3301b0a93efa222ecc7541",
             "reward": {
-                "mintingAmount" : 9600000000000000000,
-                "ratio" : "34/54/12",
+                "mintingAmount" : 9612345678123456787,
+                "ratio" : "37/52/11",
                 "useGiniCoeff" : true,
                 "deferredTxFee": true,
                 "stakingUpdateInterval": 86400,
@@ -94,7 +94,7 @@ var (
             "policy": 2,
             "sub": 22
         },
-        "unitPrice": 25000000000
+        "unitPrice": 25123456789
     },
     "nonce": "0x0",
     "timestamp": "0x5d10c5d1",
