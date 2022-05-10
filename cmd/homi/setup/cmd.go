@@ -288,7 +288,7 @@ func genValidatorKeystore(privKeys []*ecdsa.PrivateKey) {
 }
 
 func genCypressCommonGenesis(nodeAddrs, testAddrs []common.Address) *blockchain.Genesis {
-	mintingAmount, _ := new(big.Int).SetString("9600000000000000000", 10)
+	mintingAmount, _ := new(big.Int).SetString("96623685519213747", 10)
 	genesisJson := &blockchain.Genesis{
 		Timestamp:  uint64(time.Now().Unix()),
 		BlockScore: big.NewInt(genesis.InitBlockScore),
