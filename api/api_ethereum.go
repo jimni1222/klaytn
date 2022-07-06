@@ -1089,27 +1089,31 @@ func (args *EthTransactionArgs) setDefaults(ctx context.Context, b Backend) erro
 	// If user specifies both maxPriorityFee and maxFee, then we do not
 	// need to consult the chain for defaults. It's definitely a London tx.
 	if args.MaxPriorityFeePerGas == nil || args.MaxFeePerGas == nil {
+		// If user did not define GasPrice and EthTxTypeFork is enabled,
+		// then setting default values with dynamic fields.
+		// If GasPrice is not nil, then use that.
 		if b.ChainConfig().IsEthTxTypeForkEnabled(head.Number) && args.GasPrice == nil {
 			if args.MaxPriorityFeePerGas == nil {
 				args.MaxPriorityFeePerGas = (*hexutil.Big)(gasPrice)
 			}
-			if args.MaxFeePerGas == nil {
-				// Before KIP-71 hard fork, `gasFeeCap` was set to `baseFee*2 + maxPriorityFeePerGas` by default.
-				gasFeeCap := new(big.Int).Add(
-					(*big.Int)(args.MaxPriorityFeePerGas),
-					new(big.Int).Mul(fixedBaseFee, big.NewInt(2)),
-				)
-				if isKIP71 {
-					// After KIP-71 hard fork, `gasFeeCap` was set to `baseFee*2` by default.
-					gasFeeCap = new(big.Int).Mul(gasPrice, big.NewInt(2))
-				}
-				args.MaxFeePerGas = (*hexutil.Big)(gasFeeCap)
-			}
 			if isKIP71 {
+				if args.MaxFeePerGas == nil {
+					// After KIP-71 hard fork, `gasFeeCap` was set to `baseFee*2` by default.
+					gasFeeCap := new(big.Int).Mul(gasPrice, big.NewInt(2))
+					args.MaxFeePerGas = (*hexutil.Big)(gasFeeCap)
+				}
 				if args.MaxFeePerGas.ToInt().Cmp(gasPrice) < 0 {
 					return fmt.Errorf("maxFeePerGas (%v) < BaseFee (%v)", args.MaxFeePerGas, gasPrice)
 				}
 			} else {
+				if args.MaxFeePerGas == nil {
+					// Before KIP-71 hard fork, `gasFeeCap` was set to `baseFee*2 + maxPriorityFeePerGas` by default.
+					gasFeeCap := new(big.Int).Add(
+						(*big.Int)(args.MaxPriorityFeePerGas),
+						new(big.Int).Mul(fixedBaseFee, big.NewInt(2)),
+					)
+					args.MaxFeePerGas = (*hexutil.Big)(gasFeeCap)
+				}
 				if args.MaxPriorityFeePerGas.ToInt().Cmp(gasPrice) != 0 || args.MaxFeePerGas.ToInt().Cmp(gasPrice) != 0 {
 					return fmt.Errorf("only %s is allowed to be used as maxFeePerGas and maxPriorityPerGas", gasPrice.Text(16))
 				}
@@ -1118,18 +1122,15 @@ func (args *EthTransactionArgs) setDefaults(ctx context.Context, b Backend) erro
 				return fmt.Errorf("maxFeePerGas (%v) < maxPriorityFeePerGas (%v)", args.MaxFeePerGas, args.MaxPriorityFeePerGas)
 			}
 		} else {
+			// This else means that "EthTxTypeFork is not activated yet" or "GasPrice != nil".
+			// If the condition below is met, it means that "GasPrice == nil", then should be "EthTxTypeFork is not activated yet".
+			// Because it returns an error if GasPrice and maxFeePerGas or maxPriorityFeePerGas are defined at the same time at the beginning of the function.
 			if args.MaxFeePerGas != nil || args.MaxPriorityFeePerGas != nil {
-				return errors.New("maxFeePerGas or maxPriorityFeePerGas specified but london is not active yet")
+				return errors.New("maxFeePerGas or maxPriorityFeePerGas specified but EthTxTypeFork is not active yet")
 			}
+
+			// If the condition below is met, it means that "EthTxTypeFork is not activated yet".
 			if args.GasPrice == nil {
-				// TODO-Klaytn: Original logic of Ethereum uses b.SuggestTipCap which suggests TipCap, not a GasPrice.
-				// But Klaytn currently uses fixed unit price determined by Governance, so using b.SuggestPrice
-				// is fine as now.
-				if b.ChainConfig().IsEthTxTypeForkEnabled(head.Number) {
-					// TODO-Klaytn: Klaytn is using fixed BaseFee(0) as now but
-					// if we apply dynamic BaseFee, we should add calculated BaseFee instead of params.ZeroBaseFee.
-					gasPrice.Add(gasPrice, new(big.Int).SetUint64(params.ZeroBaseFee))
-				}
 				args.GasPrice = (*hexutil.Big)(gasPrice)
 			}
 		}
