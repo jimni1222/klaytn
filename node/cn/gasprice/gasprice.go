@@ -102,7 +102,7 @@ func (gpo *Oracle) SuggestPrice(ctx context.Context) (*big.Int, error) {
 		return common.Big0, nil
 	}
 	// Since we have fixed gas price, we can directly get this value from TxPool.
-	return gpo.txPool.GasPrice(), nil
+	return new(big.Int).Mul(gpo.txPool.GasPrice(), big.NewInt(2)), nil
 	/*
 		// TODO-Klaytn-RemoveLater Later remove below obsolete code if we don't need them anymore.
 		gpo.cacheLock.RLock()
@@ -179,19 +179,19 @@ func (gpo *Oracle) SuggestPrice(ctx context.Context) (*big.Int, error) {
 }
 
 // TODO-Klaytn-RemoveLater Later remove below obsolete code if we don't need them anymore.
-//type getBlockPricesResult struct {
+// type getBlockPricesResult struct {
 //	price *big.Int
 //	err   error
-//}
+// }
 //
-//type transactionsByGasPrice []*types.Transaction
+// type transactionsByGasPrice []*types.Transaction
 //
-//func (t transactionsByGasPrice) Len() int           { return len(t) }
-//func (t transactionsByGasPrice) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-//func (t transactionsByGasPrice) Less(i, j int) bool { return t[i].GasPrice().Cmp(t[j].GasPrice()) < 0 }
+// func (t transactionsByGasPrice) Len() int           { return len(t) }
+// func (t transactionsByGasPrice) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
+// func (t transactionsByGasPrice) Less(i, j int) bool { return t[i].GasPrice().Cmp(t[j].GasPrice()) < 0 }
 //
-//type bigIntArray []*big.Int
+// type bigIntArray []*big.Int
 //
-//func (s bigIntArray) Len() int           { return len(s) }
-//func (s bigIntArray) Less(i, j int) bool { return s[i].Cmp(s[j]) < 0 }
-//func (s bigIntArray) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+// func (s bigIntArray) Len() int           { return len(s) }
+// func (s bigIntArray) Less(i, j int) bool { return s[i].Cmp(s[j]) < 0 }
+// func (s bigIntArray) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
